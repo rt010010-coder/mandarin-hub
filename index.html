@@ -171,23 +171,29 @@
   </div>
 
   <script>
-    // -------------------------------------------------------------
+   // -------------------------------------------------------------
     // ★ 關鍵：與 Google Apps Script API 串接的設定
     // -------------------------------------------------------------
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbw5f4BvZ49w8Q4uWd9PUsiMal20mCOr9eUcyqQwDsTToDALKZo8lhgK5PgfKJXiP88N/exec";
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbw5f4BvZ49w8Q4uWd9PUsiMal20mCOr9eUcyqQwDsTToDALKZo8lhgK5PgfKJXiP88N/exec"; // ⚠️ 請記得替換為新網址
 
-    // 通用的 API 呼叫函式 (移除 headers 以完美避開 CORS preflight)
+    // 防彈級 API 呼叫函式 (強制轉文字 + 跟隨重新導向，完美破解 CORS)
     async function callApi(action, payload = {}) {
       const requestData = { action: action, ...payload };
       try {
         const response = await fetch(GAS_URL, {
           method: 'POST',
-          body: JSON.stringify(requestData) // 不設定 Content-Type，讓瀏覽器用預設的 text/plain 送出
+          redirect: 'follow', // 關鍵：強制瀏覽器跟隨 Google 內部的轉址
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8' // 關鍵：偽裝成純文字，避開瀏覽器預檢攔截
+          },
+          body: JSON.stringify(requestData)
         });
-        return await response.json();
+        
+        const result = await response.json();
+        return result;
       } catch (error) {
-        console.error("API Error:", error);
-        alert("連線失敗！請按 F12 開啟開發者工具，切換到 Console 標籤頁查看紅字錯誤，並截圖給我！");
+        console.error("API Error 錯誤詳情:", error);
+        alert("連線被阻擋或超時！請檢查 GAS 是否發布為「所有人(Anyone)」。");
         throw error;
       }
     }
