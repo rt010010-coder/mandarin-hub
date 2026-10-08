@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>菲律賓同仁中文學習系統</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .card-grid-item { cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; border-radius: 16px; }
+    .card-grid-item:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+    .star-rating i { cursor: pointer; color: #ffc107; font-size: 1.3rem; margin-right: 2px; }
+    .page-section { display: none; }
+    .active-section { display: block; }
+  </style>
+</head>
+<body>
+
+  <!-- 頂部導覽列 -->
+  <nav class="navbar navbar-dark bg-indigo px-3 shadow-sm" style="background-color: #3f51b5;">
+    <span class="navbar-brand mb-0 h1 fw-bold"><i class="fa-solid fa-language me-2"></i>Mandarin Learning Hub</span>
+    <div id="nav-user-info" class="text-white d-none">
+      <span id="user-display-name" class="me-3 fw-semibold"></span>
+      <button class="btn btn-outline-light btn-sm" onclick="logout()"><i class="fa-solid fa-right-from-bracket me-1"></i>Logout</button>
+    </div>
+  </nav>
+
+  <div class="container py-4">
+
+    <!-- 1. 登入頁面 -->
+    <div id="login-section" class="page-section active-section">
+      <div class="row justify-content-center pt-5">
+        <div class="col-md-5 col-lg-4">
+          <div class="card shadow-lg border-0 rounded-4">
+            <div class="card-body p-4 text-center">
+              <i class="fa-solid fa-globe text-primary mb-3" style="font-size: 3rem;"></i>
+              <h4 class="fw-bold mb-4">Mandarin Hub Login</h4>
+              <div class="mb-3 text-start">
+                <label class="form-label text-muted">Employee ID (帳號)</label>
+                <input type="text" id="login-username" class="form-control form-control-lg" placeholder="e.g. RT001">
+              </div>
+              <div class="mb-4 text-start">
+                <label class="form-label text-muted">Password (密碼)</label>
+                <input type="password" id="login-password" class="form-control form-control-lg" placeholder="••••••••">
+              </div>
+              <button id="btn-login" class="btn btn-primary btn-lg w-100 fw-bold" onclick="login()">Login (登入)</button>
+              <div id="login-error" class="text-danger mt-3 small d-none">Invalid credentials. Please try again.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. 九宮格主選單 -->
+    <div id="menu-section" class="page-section">
+      <h3 class="fw-bold text-secondary mb-4">Main Menu</h3>
+      <div class="row g-4">
+        <div class="col-6 col-md-4">
+          <div class="card card-grid-item p-4 text-center border-primary bg-primary bg-opacity-10 h-100" onclick="showVocabScreen()">
+            <i class="fa-solid fa-list-check text-primary mb-3" style="font-size: 3rem;"></i>
+            <h5 class="fw-bold text-primary">Vocabulary<br><small class="text-muted fs-6">(單字庫)</small></h5>
+          </div>
+        </div>
+        <div class="col-6 col-md-4">
+          <div class="card card-grid-item p-4 text-center border-warning bg-warning bg-opacity-10 h-100" onclick="showQuizScreen()">
+            <i class="fa-solid fa-microphone-lines text-warning mb-3" style="font-size: 3rem;"></i>
+            <h5 class="fw-bold text-warning">Oral Quiz<br><small class="text-muted fs-6">(考試測驗)</small></h5>
+          </div>
+        </div>
+        <div id="admin-card-btn" class="col-6 col-md-4 d-none">
+          <div class="card card-grid-item p-4 text-center border-danger bg-danger bg-opacity-10 h-100" onclick="showAdminScreen()">
+            <i class="fa-solid fa-user-shield text-danger mb-3" style="font-size: 3rem;"></i>
+            <h5 class="fw-bold text-danger">Admin Dashboard<br><small class="text-muted fs-6">(管理員後台)</small></h5>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. 單字庫頁面 -->
+    <div id="vocab-section" class="page-section">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <button class="btn btn-outline-secondary" onclick="showMenuScreen()"><i class="fa-solid fa-arrow-left me-1"></i>Back to Menu</button>
+        <div class="d-flex align-items-center">
+          <i class="fa-solid fa-filter me-2 text-muted"></i>
+          <select id="star-filter" class="form-select w-auto" onchange="renderVocabList()">
+            <option value="all">All Words (全部)</option>
+            <option value="0">0 Stars (不熟)</option>
+            <option value="1">1 Star</option>
+            <option value="2">2 Stars</option>
+            <option value="3">3 Stars (熟練)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-3">
+          <div class="input-group input-group-lg">
+            <input type="text" id="add-word-input" class="form-control" placeholder="Enter English word (e.g. Overtime)">
+            <button id="btn-add-word" class="btn btn-primary px-4" onclick="addWord()"><i class="fa-solid fa-plus me-1"></i>Add</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="vocab-list" class="row g-3">
+        <!-- 動態渲染單字卡 -->
+      </div>
+    </div>
+
+    <!-- 4. 口語測驗頁面 -->
+    <div id="quiz-section" class="page-section">
+      <div class="mb-3">
+        <button class="btn btn-outline-secondary" onclick="showMenuScreen()"><i class="fa-solid fa-arrow-left me-1"></i>Back to Menu</button>
+      </div>
+
+      <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+          <div id="quiz-empty-msg" class="text-center py-5 d-none">
+            <h5 class="text-muted">No words available in this filter.<br>(目前沒有符合的單字可測驗)</h5>
+          </div>
+
+          <div id="quiz-box" class="card shadow border-0 text-center p-4">
+            <div class="text-primary fw-bold mb-2">Question <span id="quiz-step">1</span> / <span id="quiz-total">1</span></div>
+            <h1 id="quiz-chinese" class="display-3 fw-bold text-primary mb-1">今天</h1>
+            <p id="quiz-pinyin" class="text-danger fw-semibold fs-5 mb-1">jīntiān</p>
+            <p id="quiz-english" class="text-muted mb-4">Meaning: Today</p>
+
+            <div class="mb-3">
+              <div class="input-group">
+                <input type="text" id="quiz-speech-input" class="form-control form-control-lg text-center" placeholder="Click mic and speak in Chinese...">
+                <button id="btn-mic" class="btn btn-outline-danger px-3" onclick="toggleMic()">
+                  <i class="fa-solid fa-microphone"></i>
+                </button>
+              </div>
+            </div>
+
+            <button id="btn-submit-quiz" class="btn btn-success btn-lg w-100 fw-bold mb-3" onclick="submitQuiz()"><i class="fa-solid fa-circle-check me-2"></i>Submit Pronunciation</button>
+
+            <div id="quiz-result" class="alert d-none" role="alert">
+              <h5 id="quiz-result-title" class="fw-bold mb-1"></h5>
+              <p id="quiz-result-body" class="mb-0"></p>
+            </div>
+
+            <div class="d-flex justify-content-end mt-3">
+              <button id="btn-next-quiz" class="btn btn-outline-primary" onclick="nextQuizCard()">Next Card <i class="fa-solid fa-chevron-right ms-1"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. 管理員後台頁面 -->
+    <div id="admin-section" class="page-section">
+      <div class="mb-3">
+        <button class="btn btn-outline-secondary" onclick="showMenuScreen()"><i class="fa-solid fa-arrow-left me-1"></i>Back to Menu</button>
+      </div>
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-danger text-white fw-bold fs-5">
+          <i class="fa-solid fa-clock-rotate-left me-2"></i>Employee Learning Records (學習紀錄)
+        </div>
+        <div class="card-body p-0">
+          <ul id="admin-records-list" class="list-group list-group-flush">
+            <!-- 動態渲染紀錄 -->
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // -------------------------------------------------------------
+    // ★ 關鍵：與 Google Apps Script API 串接的設定
+    // -------------------------------------------------------------
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbw5f4BvZ49w8Q4uWd9PUsiMal20mCOr9eUcyqQwDsTToDALKZo8lhgK5PgfKJXiP88N/exec";
+
+    // 通用的 API 呼叫函式 (使用 fetch)
+    async function callApi(action, payload = {}) {
+      const requestData = { action: action, ...payload };
+      try {
+        const response = await fetch(GAS_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // 避免 CORS preflight 阻擋
+          body: JSON.stringify(requestData),
+          redirect: 'follow'
+        });
+        return await response.json();
+      } catch (error) {
+        console.error("API Error:", error);
+        alert("網路連線錯誤，請稍後再試！");
+        throw error;
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 全域變數狀態
+    // -------------------------------------------------------------
+    let currentUser = null;
+    let flashcards = [];
+    let quizList = [];
+    let quizStep = 0;
+    let recognition = null;
+    let isListening = false;
+
+    // -------------------------------------------------------------
+    // 語音辨識與 TTS 發音初始化
+    // -------------------------------------------------------------
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SpeechRecognition();
+      recognition.lang = 'zh-TW';
+      recognition.continuous = false;
+      recognition.interimResults = true;
+
+      recognition.onresult = function(event) {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        document.getElementById('quiz-speech-input').value = transcript;
+      };
+
+      recognition.onend = function() {
+        isListening = false;
+        document.getElementById('btn-mic').classList.remove('btn-danger');
+        document.getElementById('btn-mic').classList.add('btn-outline-danger');
+      };
+
+      recognition.onerror = function(event) {
+        isListening = false;
+        document.getElementById('btn-mic').classList.remove('btn-danger');
+        document.getElementById('btn-mic').classList.add('btn-outline-danger');
+        alert("麥克風辨識錯誤: " + event.error + "\n請確認瀏覽器已允許麥克風權限。");
+      };
+    }
+
+    async function toggleMic() {
+      if (!recognition) {
+        alert("您的瀏覽器不支援 Web Speech 語音辨識，請使用 Chrome 瀏覽器。");
+        return;
+      }
+
+      if (!isListening) {
+        try {
+          await navigator.mediaDevices.getUserMedia({ audio: true }); // 在 GitHub Pages 這裡會完美跳出授權！
+          recognition.start();
+          isListening = true;
+          document.getElementById('btn-mic').classList.remove('btn-outline-danger');
+          document.getElementById('btn-mic').classList.add('btn-danger');
+        } catch (err) {
+          alert("無法存取麥克風，請確認是否允許麥克風權限！\n錯誤細節: " + err);
+        }
+      } else {
+        recognition.stop();
+      }
+    }
+
+    function speakText(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'zh-TW';
+      utterance.rate = 0.8;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function speakExample(example) {
+      const chineseOnly = example.replace(/\(.*?\)/g, '').trim();
+      speakText(chineseOnly);
+    }
+
+    // -------------------------------------------------------------
+    // UI 頁面切換機制
+    // -------------------------------------------------------------
+    function showSection(sectionId) {
+      document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active-section'));
+      document.getElementById(sectionId).classList.add('active-section');
+    }
+
+    function showMenuScreen() { showSection('menu-section'); }
+    function showVocabScreen() { showSection('vocab-section'); fetchFlashcards(); }
+    function showQuizScreen() { showSection('quiz-section'); fetchFlashcards(true); }
+    
+    async function showAdminScreen() {
+      showSection('admin-section');
+      const list = document.getElementById('admin-records-list');
+      list.innerHTML = '<li class="list-group-item text-center">Loading...</li>';
+      
+      const res = await callApi('get_records');
+      list.innerHTML = '';
+      (res.records || []).forEach(r => {
+        list.innerHTML += `<li class="list-group-item d-flex justify-content-between align-items-center">
+          <div><strong>${r.username}</strong> - ${r.action}</div>
+          <small class="text-muted">${r.time}</small>
+        </li>`;
+      });
+    }
+
+    // -------------------------------------------------------------
+    // 後端 API 互動邏輯 (Fetch API)
+    // -------------------------------------------------------------
+    async function login() {
+      const u = document.getElementById('login-username').value.trim();
+      const p = document.getElementById('login-password').value.trim();
+      if (!u || !p) return;
+
+      const btn = document.getElementById('btn-login');
+      btn.disabled = true; btn.innerText = "Logging in...";
+
+      const res = await callApi('login', { username: u, password: p });
+      
+      btn.disabled = false; btn.innerText = "Login (登入)";
+      if (res.success) {
+        currentUser = res;
+        document.getElementById('user-display-name').innerText = `Welcome, ${res.name}!`;
+        document.getElementById('nav-user-info').classList.remove('d-none');
+        if (res.role === 'admin') document.getElementById('admin-card-btn').classList.remove('d-none');
+        showMenuScreen();
+      } else {
+        document.getElementById('login-error').classList.remove('d-none');
+      }
+    }
+
+    function logout() {
+      currentUser = null;
+      document.getElementById('nav-user-info').classList.add('d-none');
+      document.getElementById('admin-card-btn').classList.add('d-none');
+      document.getElementById('login-username').value = '';
+      document.getElementById('login-password').value = '';
+      showSection('login-section');
+    }
+
+    async function fetchFlashcards(startQuizAfter = false) {
+      const res = await callApi('get_flashcards', { username: currentUser.username });
+      flashcards = res.flashcards || [];
+      renderVocabList();
+      if (startQuizAfter) startQuiz();
+    }
+
+    async function addWord() {
+      const input = document.getElementById('add-word-input');
+      const val = input.value.trim();
+      if (!val) return;
+
+      const btn = document.getElementById('btn-add-word');
+      btn.disabled = true; btn.innerText = "Adding...";
+
+      const card = await callApi('translate', { username: currentUser.username, english_text: val });
+      
+      btn.disabled = false; btn.innerText = "Add";
+      input.value = '';
+      flashcards.unshift(card);
+      renderVocabList();
+    }
+
+    async function deleteCard(id) {
+      flashcards = flashcards.filter(c => String(c.id) !== String(id));
+      renderVocabList();
+      await callApi('delete_flashcard', { card_id: id });
+    }
+
+    async function updateStars(id, newStars) {
+      const card = flashcards.find(c => String(c.id) === String(id));
+      if (card) {
+        card.stars = (card.stars === newStars) ? 0 : newStars;
+        renderVocabList();
+        await callApi('update_stars', { card_id: id, stars: card.stars });
+      }
+    }
+
+    function renderVocabList() {
+      const filter = document.getElementById('star-filter').value;
+      const list = document.getElementById('vocab-list');
+      list.innerHTML = '';
+
+      const filtered = flashcards.filter(c => filter === 'all' || String(c.stars) === filter);
+
+      if (filtered.length === 0) {
+        list.innerHTML = `<div class="text-center py-5 text-muted">No words found in this filter.</div>`;
+        return;
+      }
+
+      filtered.forEach(c => {
+        let starsHtml = '';
+        for (let i = 1; i <= 3; i++) {
+          starsHtml += `<i class="fa-${i <= c.stars ? 'solid' : 'regular'} fa-star" onclick="updateStars('${c.id}', ${i})"></i>`;
+        }
+
+        list.innerHTML += `
+          <div class="col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <h4 class="fw-bold text-primary mb-0">${c.chinese} <small class="fs-6 text-muted">(${c.english})</small></h4>
+                  <div class="star-rating">${starsHtml}</div>
+                </div>
+                <p class="text-danger fw-semibold mb-2">Pinyin: ${c.pinyin}</p>
+                <p class="small text-secondary mb-3">Ex: ${c.example}</p>
+                <div class="d-flex justify-content-end gap-2 border-top pt-2">
+                  <button class="btn btn-sm btn-outline-primary" onclick="speakText('${c.chinese}')"><i class="fa-solid fa-volume-high me-1"></i>聽單字</button>
+                  <button class="btn btn-sm btn-outline-success" onclick="speakExample('${c.example}')"><i class="fa-solid fa-comment-dots me-1"></i>聽例句</button>
+                  <button class="btn btn-sm btn-outline-danger" onclick="deleteCard('${c.id}')"><i class="fa-solid fa-trash me-1"></i>刪除</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    // -------------------------------------------------------------
+    // 口語測驗邏輯
+    // -------------------------------------------------------------
+    function startQuiz() {
+      const filter = document.getElementById('star-filter').value;
+      quizList = flashcards.filter(c => filter === 'all' || String(c.stars) === filter);
+      
+      if (quizList.length === 0) {
+        document.getElementById('quiz-box').classList.add('d-none');
+        document.getElementById('quiz-empty-msg').classList.remove('d-none');
+        return;
+      }
+
+      document.getElementById('quiz-box').classList.remove('d-none');
+      document.getElementById('quiz-empty-msg').classList.add('d-none');
+
+      quizList.sort(() => Math.random() - 0.5);
+      quizStep = 0;
+      showQuizCard();
+    }
+
+    function showQuizCard() {
+      const card = quizList[quizStep];
+      document.getElementById('quiz-step').innerText = quizStep + 1;
+      document.getElementById('quiz-total').innerText = quizList.length;
+      document.getElementById('quiz-chinese').innerText = card.chinese;
+      document.getElementById('quiz-pinyin').innerText = "Pinyin: " + card.pinyin;
+      document.getElementById('quiz-english').innerText = "Meaning: " + card.english;
+      document.getElementById('quiz-speech-input').value = '';
+      document.getElementById('quiz-result').classList.add('d-none');
+
+      const nextBtn = document.getElementById('btn-next-quiz');
+      nextBtn.disabled = (quizStep >= quizList.length - 1);
+    }
+
+    async function submitQuiz() {
+      const card = quizList[quizStep];
+      const speech = document.getElementById('quiz-speech-input').value.trim();
+      if (!speech) return;
+
+      const btn = document.getElementById('btn-submit-quiz');
+      btn.disabled = true;
+
+      const res = await callApi('evaluate_speech', { username: currentUser.username, target_chinese: card.chinese, user_speech_text: speech });
+      
+      btn.disabled = false;
+      const resultAlert = document.getElementById('quiz-result');
+      const title = document.getElementById('quiz-result-title');
+      const body = document.getElementById('quiz-result-body');
+
+      resultAlert.classList.remove('d-none', 'alert-success', 'alert-danger');
+      if (res.is_passed) {
+        resultAlert.classList.add('alert-success');
+        title.innerText = "✅ PASSED (合格)";
+      } else {
+        resultAlert.classList.add('alert-danger');
+        title.innerText = "❌ NEEDS PRACTICE (需再練習)";
+      }
+      body.innerText = `Score: ${res.score} - ${res.feedback}`;
+    }
+
+    function nextQuizCard() {
+      if (quizStep < quizList.length - 1) {
+        quizStep++;
+        showQuizCard();
+      }
+    }
+  </script>
+</body>
+</html>
